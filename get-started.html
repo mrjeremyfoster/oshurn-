@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Start your Oshurn Financial review.">
+  <title>Get Started | Oshurn Financial</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .intake-page{background:#f7f5ef;min-height:100vh;padding:48px 20px 80px}.intake-wrap{max-width:900px;margin:0 auto}.intake-card{background:#fff;border:1px solid #e4e1d8;padding:36px;box-shadow:0 18px 50px rgba(10,45,35,.08)}.intake-card h1{font-family:'Playfair Display',serif;font-size:clamp(38px,6vw,64px);line-height:1.05;margin:10px 0 16px;color:#0c3b2e}.intake-card>p{max-width:680px;color:#66706a;line-height:1.7}.intake-form{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}.field{display:flex;flex-direction:column;gap:8px}.field.full{grid-column:1/-1}.field label{font-weight:700;font-size:14px;color:#163f33}.field input,.field select{width:100%;box-sizing:border-box;border:1px solid #d8d6ce;background:#fff;padding:14px 15px;border-radius:4px;font:inherit;color:#1f2d27}.field input:focus,.field select:focus{outline:2px solid #c9aa55;outline-offset:1px}.consent{grid-column:1/-1;display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#66706a;line-height:1.5}.consent input{margin-top:4px}.form-actions{grid-column:1/-1;display:flex;align-items:center;gap:18px;flex-wrap:wrap}.form-status{font-size:14px;color:#53645c}.back-link{display:inline-block;margin-bottom:22px;color:#0c3b2e;text-decoration:none;font-weight:700}@media(max-width:700px){.intake-page{padding:25px 14px 60px}.intake-card{padding:24px 18px}.intake-form{grid-template-columns:1fr}.field.full,.consent,.form-actions{grid-column:auto}.form-actions .btn{width:100%;text-align:center}.intake-card h1{font-size:43px}}
+  </style>
+</head>
+<body>
+<header class="site-header"><div class="container nav-wrap"><a class="brand" href="index.html" aria-label="Oshurn Financial home"><span class="brand-mark">O</span><span><strong>OSHURN</strong><small>FINANCIAL</small></span></a><a class="nav-cta" href="index.html">Back to Oshurn</a></div></header>
+<main class="intake-page"><div class="intake-wrap"><a class="back-link" href="index.html">← Back to Oshurn Financial</a><section class="intake-card"><p class="eyebrow">START YOUR OSHURN JOURNEY</p><h1>Let's understand what you need.</h1><p>Give us a few basics so we can route your request to the right Oshurn workflow. Please do not enter medical details, account numbers, Social Security numbers, or other sensitive information in this form.</p><form id="lead-form" class="intake-form">
+<div class="field"><label for="firstName">First name *</label><input id="firstName" name="firstName" autocomplete="given-name" required></div>
+<div class="field"><label for="lastName">Last name *</label><input id="lastName" name="lastName" autocomplete="family-name" required></div>
+<div class="field"><label for="email">Email *</label><input id="email" name="email" type="email" autocomplete="email" required></div>
+<div class="field"><label for="phone">Phone *</label><input id="phone" name="phone" type="tel" autocomplete="tel" required></div>
+<div class="field"><label for="state">State *</label><select id="state" name="state" required><option value="">Select your state</option><option>Alabama</option><option>Arizona</option><option>Arkansas</option><option>California</option><option>Colorado</option><option>Florida</option><option>Georgia</option><option>Illinois</option><option>Louisiana</option><option>New Mexico</option><option>North Carolina</option><option>Oklahoma</option><option>South Carolina</option><option>Tennessee</option><option>Texas</option><option>Virginia</option><option>Other</option></select></div>
+<div class="field"><label for="interest">What can we help with? *</label><select id="interest" name="interest" required><option value="">Choose one</option><option>Life Insurance</option><option>Health Insurance</option><option>Medicare</option><option>Property & Casualty</option><option>Financial Education</option><option>Financial Planning</option><option>Not sure yet</option></select></div>
+<div class="field"><label for="contactPreference">Preferred contact *</label><select id="contactPreference" name="contactPreference" required><option value="">Choose one</option><option>Phone</option><option>Text</option><option>Email</option></select></div>
+<div class="field"><label for="timing">When should we reach out?</label><select id="timing" name="timing"><option>As soon as possible</option><option>This week</option><option>Next week</option><option>No preference</option></select></div>
+<div class="field full"><label for="referralSource">How did you hear about Oshurn?</label><select id="referralSource" name="referralSource"><option>Website</option><option>Referral</option><option>Social media</option><option>Search</option><option>Event</option><option>Other</option></select></div>
+<label class="consent"><input type="checkbox" name="consent" required> <span>I agree that Oshurn Financial may use the information I provide to contact me about my request. I understand this form is for initial intake and is not an application for insurance or an individualized investment recommendation.</span></label>
+<div class="form-actions"><button class="btn btn-primary" type="submit">Submit My Request</button><span id="form-status" class="form-status" role="status"></span></div>
+</form></section></div></main>
+<script>
+const form=document.getElementById('lead-form');const status=document.getElementById('form-status');
+form.addEventListener('submit',async(e)=>{e.preventDefault();status.textContent='Sending your request…';const data=Object.fromEntries(new FormData(form).entries());try{const r=await fetch('/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const out=await r.json();if(!r.ok)throw new Error(out.error||'Unable to submit');form.reset();status.textContent=`Request received. Your reference is ${out.leadId}.`; }catch(err){status.textContent='We could not submit your request yet. Please try again in a moment.';}});
+</script>
+</body>
+</html>
