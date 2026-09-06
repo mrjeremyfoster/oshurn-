@@ -2,6 +2,7 @@
 (function(){
   const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(Number(n)||0);
   const $=s=>document.querySelector(s);
+  const STATE_KEYS=['oshurnHealth','oshurnGoals','oshurnToolUsage','oshurnOnboarding','oshurnProfile'];
   const setStore=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));window.dispatchEvent(new CustomEvent('oshurn:state',{detail:{key:k,value:v}}));return v}catch(e){return v}};
   const getStore=(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
   const targets={budget:'tools.html#budget',debt:'tools.html#debt',emergency:'tools.html#emergency',savings:'tools.html#emergency',networth:'tools.html#networth',goal:'goals.html',health:'health.html'};
@@ -14,21 +15,14 @@
     if(!panel)return;
     const q=String(query||'').trim().toLowerCase();
     const matches=q?results.filter(r=>(r[0]+' '+r[2]).toLowerCase().includes(q)):[];
-    panel.hidden=!q;
-    activeSearchIndex=-1;
+    panel.hidden=!q;activeSearchIndex=-1;
     panel.innerHTML=q?(matches.length?'<strong>Oshurn results</strong>'+matches.map((r,i)=>`<a href="${r[1]}" data-search-index="${i}">${r[0]}<small>${r[2]}</small></a>`).join(''):'<span>No matching Oshurn resource yet.</span>'):'';
     return matches;
   }
   if(search){
-    search.setAttribute('aria-controls','search-panel');search.setAttribute('aria-autocomplete','list');
+    search.setAttribute('aria-controls','search-panel');search.setAttribute('aria-autocomplete','list');search.setAttribute('role','searchbox');
     search.addEventListener('input',()=>renderSearch(search.value));
-    search.addEventListener('keydown',e=>{
-      const links=panel?[...panel.querySelectorAll('a[data-search-index]')]:[];
-      if(e.key==='Escape'){search.value='';renderSearch('');search.blur();return}
-      if(!links.length)return;
-      if(e.key==='ArrowDown'){e.preventDefault();activeSearchIndex=(activeSearchIndex+1)%links.length;links[activeSearchIndex].focus()}
-      if(e.key==='ArrowUp'){e.preventDefault();activeSearchIndex=(activeSearchIndex-1+links.length)%links.length;links[activeSearchIndex].focus()}
-    });
+    search.addEventListener('keydown',e=>{const links=panel?[...panel.querySelectorAll('a[data-search-index]')]:[];if(e.key==='Escape'){search.value='';renderSearch('');search.blur();return}if(!links.length)return;if(e.key==='ArrowDown'){e.preventDefault();activeSearchIndex=(activeSearchIndex+1)%links.length;links[activeSearchIndex].focus()}if(e.key==='ArrowUp'){e.preventDefault();activeSearchIndex=(activeSearchIndex-1+links.length)%links.length;links[activeSearchIndex].focus()}});
     search.addEventListener('focus',()=>{if(search.value.trim())renderSearch(search.value)});
   }
   const health=$('#health-number');
@@ -38,40 +32,29 @@
   function syncGoals(){const goals=getStore('oshurnGoals',[]);if(goalCount)goalCount.textContent=Array.isArray(goals)?goals.length:0;return Array.isArray(goals)?goals:[];}
   let goals=syncGoals();
   const usage=getStore('oshurnToolUsage',{});
-  function syncUsage(){
-    const total=Object.values(usage).reduce((sum,n)=>sum+(Number(n)||0),0);
-    const metric=document.querySelector('.app-metrics article:nth-child(4) strong');
-    if(metric)metric.textContent=total;
-    return usage;
-  }
-  function recordToolUse(tool){
-    if(!toolNames[tool])return;
-    usage[tool]=(Number(usage[tool])||0)+1;
-    setStore('oshurnToolUsage',usage);
-    syncUsage();
-  }
+  function syncUsage(){const total=Object.values(usage).reduce((sum,n)=>sum+(Number(n)||0),0);const metric=document.querySelector('.app-metrics article:nth-child(4) strong');if(metric)metric.textContent=total;return usage;}
+  function recordToolUse(tool){if(!toolNames[tool])return;usage[tool]=(Number(usage[tool])||0)+1;setStore('oshurnToolUsage',usage);syncUsage();}
   syncUsage();
-  document.querySelectorAll('a[href*="tools.html"],a[href="health.html"],a[href="goals.html"]').forEach(link=>{
-    link.addEventListener('click',()=>{
-      const href=link.getAttribute('href')||'';
-      const match=href.match(/tools\.html#([^#]+)/);
-      const tool=match?match[1]:(href==='health.html'?'health':href==='goals.html'?'goal':null);
-      if(tool)recordToolUse(tool);
-    });
-  });
+  document.querySelectorAll('a[href*="tools.html"],a[href="health.html"],a[href="goals.html"]').forEach(link=>link.addEventListener('click',()=>{const href=link.getAttribute('href')||'';const match=href.match(/tools\.html#([^#]+)/);const tool=match?match[1]:(href==='health.html'?'health':href==='goals.html'?'goal':null);if(tool)recordToolUse(tool)}));
   const onboarding=getStore('oshurnOnboarding',{completed:false,step:0});
+  const profile=getStore('oshurnProfile',{schemaVersion:1,displayName:'',createdAt:new Date().toISOString()});
+  function saveProfile(next){const value={schemaVersion:1,displayName:String(next&&next.displayName||'').trim().slice(0,80),createdAt:(next&&next.createdAt)||profile.createdAt||new Date().toISOString()};setStore('oshurnProfile',value);Object.assign(profile,value);return value}
+  function exportUserData(){const data={schemaVersion:1,exportedAt:new Date().toISOString(),data:{}};STATE_KEYS.forEach(k=>{const value=getStore(k,null);if(value!==null)data.data[k]=value});return JSON.stringify(data,null,2)}
+  function clearUserData(){STATE_KEYS.forEach(k=>localStorage.removeItem(k));window.dispatchEvent(new CustomEvent('oshurn:state',{detail:{key:'oshurn:reset',value:true}}));return true}
   window.Oshurn={money,save:setStore,load:getStore,
     updateHealth:function(score){const value=Math.max(0,Math.min(100,Number(score)||0));setStore('oshurnHealth',value);syncHealth();return value},
     setGoals:function(items){const value=Array.isArray(items)?items:[];setStore('oshurnGoals',value);goals=value;syncGoals();return value},
-    addGoal:function(goal){const value=syncGoals();if(!goal||!String(goal.name||'').trim()||Number(goal.target)<=0)return value;value.push({...goal,name:String(goal.name).trim(),current:Math.max(0,Number(goal.current)||0),target:Number(goal.target),createdAt:goal.createdAt||new Date().toISOString()});setStore('oshurnGoals',value);goals=value;syncGoals();return value},
+    addGoal:function(goal){const value=syncGoals();if(!goal||!String(goal.name||'').trim()||Number(goal.target)<=0)return value;value.push({...goal,name:String(goal.name).trim().slice(0,120),current:Math.max(0,Number(goal.current)||0),target:Number(goal.target),createdAt:goal.createdAt||new Date().toISOString()});setStore('oshurnGoals',value);goals=value;syncGoals();return value},
     getGoals:function(){return syncGoals()},
     recordToolUse:function(tool){recordToolUse(tool);return {...usage}},
     getToolUsage:function(){return {...usage}},
+    profile:{get:()=>({...profile}),save:saveProfile},
+    privacy:{exportData:exportUserData,clearData:clearUserData,keys:[...STATE_KEYS]},
     onboarding:{state:()=>getStore('oshurnOnboarding',{completed:false,step:0}),setStep:function(step){const value={completed:false,step:Math.max(0,Number(step)||0)};setStore('oshurnOnboarding',value);return value},complete:function(){const value={completed:true,step:4};setStore('oshurnOnboarding',value);return value}},
     search:function(query){const q=String(query||'').trim().toLowerCase();return q?results.filter(r=>(r[0]+' '+r[2]).toLowerCase().includes(q)):results},
-    version:'0.8.0'
+    version:'0.9.0'
   };
-  window.addEventListener('storage',e=>{if(e.key==='oshurnHealth')syncHealth();if(e.key==='oshurnGoals')syncGoals();if(e.key==='oshurnToolUsage'){Object.assign(usage,getStore('oshurnToolUsage',{}));syncUsage()}});
-  window.addEventListener('oshurn:state',e=>{if(e.detail&&e.detail.key==='oshurnHealth')syncHealth();if(e.detail&&e.detail.key==='oshurnGoals')syncGoals();if(e.detail&&e.detail.key==='oshurnToolUsage'){Object.assign(usage,e.detail.value||{});syncUsage()}});
   if(onboarding.completed)document.documentElement.dataset.oshurnOnboarding='complete';
+  window.addEventListener('storage',e=>{if(e.key==='oshurnHealth')syncHealth();if(e.key==='oshurnGoals')syncGoals();if(e.key==='oshurnToolUsage'){Object.assign(usage,getStore('oshurnToolUsage',{}));syncUsage()}});
+  window.addEventListener('oshurn:state',e=>{if(!e.detail)return;if(e.detail.key==='oshurnHealth')syncHealth();if(e.detail.key==='oshurnGoals')syncGoals();if(e.detail.key==='oshurnToolUsage'){Object.assign(usage,e.detail.value||{});syncUsage()}});
 })();
