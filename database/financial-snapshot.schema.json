@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://oshurn.com/schemas/financial-snapshot.schema.json",
+  "title": "Oshurn Financial Snapshot",
+  "description": "Versioned educational financial-planning snapshot. This schema does not authorize regulated financial advice, insurance placement, securities activity, or account aggregation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "assets",
+    "liabilities",
+    "monthlyIncome",
+    "monthlyExpenses",
+    "monthlyDebtPayments",
+    "monthlySavings",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "assets": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Total user-entered assets for educational planning."
+    },
+    "liabilities": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Total user-entered liabilities for educational planning."
+    },
+    "monthlyIncome": {
+      "type": "number",
+      "minimum": 0
+    },
+    "monthlyExpenses": {
+      "type": "number",
+      "minimum": 0
+    },
+    "monthlyDebtPayments": {
+      "type": "number",
+      "minimum": 0
+    },
+    "monthlySavings": {
+      "type": "number",
+      "minimum": 0
+    },
+    "updatedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    }
+  }
+}
