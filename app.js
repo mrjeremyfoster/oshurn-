@@ -4,15 +4,15 @@
   const $=s=>document.querySelector(s);
   const setStore=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
   const getStore=(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
-  document.querySelectorAll('[data-tool]').forEach(card=>card.addEventListener('click',()=>{
-    const tool=card.dataset.tool;
-    const targets={budget:'tools.html#budget',debt:'tools.html#debt',emergency:'tools.html#emergency',savings:'tools.html#emergency',networth:'tools.html#networth'};
-    if(targets[tool]) window.location.href=targets[tool];
-  }));
+  const targets={budget:'tools.html#budget',debt:'tools.html#debt',emergency:'tools.html#emergency',savings:'tools.html#emergency',networth:'tools.html#networth',goal:'goals.html',health:'health.html'};
+  document.querySelectorAll('[data-tool]').forEach(card=>card.addEventListener('click',()=>{const tool=card.dataset.tool;if(targets[tool])window.location.href=targets[tool]}));
   const search=$('#workspace-search'),panel=$('#search-panel');
-  const results=[['Budget Planner','tools.html#budget'],['Debt Payoff Explorer','tools.html#debt'],['Emergency Fund','tools.html#emergency'],['Net Worth Snapshot','tools.html#networth'],['Financial Learning','index.html#learn'],['Resources','index.html#resources']];
-  if(search){search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();if(!panel)return;const matches=results.filter(r=>r[0].toLowerCase().includes(q));panel.hidden=!q;panel.innerHTML=q?(matches.length?'<strong>Oshurn results</strong>'+matches.map(r=>`<a href="${r[1]}">${r[0]}</a>`).join(''):'<span>No matching Oshurn resource yet.</span>'):'';});}
+  const results=[['Budget Planner','tools.html#budget','tool'],['Debt Payoff Explorer','tools.html#debt','tool'],['Emergency Fund','tools.html#emergency','tool'],['Net Worth Snapshot','tools.html#networth','tool'],['Financial Health','health.html','dashboard'],['Goal Planner','goals.html','planning'],['Financial Learning','index.html#learn','learning'],['Oshurn Intelligence','index.html#intelligence','intelligence'],['Resources','index.html#resources','knowledge'],['Extensions','index.html#extensions','platform']];
+  if(search){search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();if(!panel)return;const matches=results.filter(r=>(r[0]+' '+r[2]).toLowerCase().includes(q));panel.hidden=!q;panel.innerHTML=q?(matches.length?'<strong>Oshurn results</strong>'+matches.map(r=>`<a href="${r[1]}">${r[0]}</a>`).join(''):'<span>No matching Oshurn resource yet.</span>'):'';});}
   const health=$('#health-number');
   if(health){const saved=getStore('oshurnHealth');if(saved!==null)health.textContent=saved;}
-  window.Oshurn={money,save:setStore,load:getStore,updateHealth:function(score){setStore('oshurnHealth',Number(score)||0);if(health)health.textContent=Number(score)||0;}};
+  const goals=getStore('oshurnGoals',[]);
+  const goalCount=document.querySelector('.app-metrics article:nth-child(2) strong');
+  if(goalCount&&Array.isArray(goals)&&goals.length)goalCount.textContent=goals.length;
+  window.Oshurn={money,save:setStore,load:getStore,updateHealth:function(score){const value=Math.max(0,Math.min(100,Number(score)||0));setStore('oshurnHealth',value);if(health)health.textContent=value},setGoals:function(items){const value=Array.isArray(items)?items:[];setStore('oshurnGoals',value);if(goalCount)goalCount.textContent=value.length},addGoal:function(goal){const value=getStore('oshurnGoals',[]);value.push(goal);setStore('oshurnGoals',value);if(goalCount)goalCount.textContent=value.length;return value}};
 })();
