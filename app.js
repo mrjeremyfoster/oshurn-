@@ -32,7 +32,7 @@
   function syncGoals(){const goals=getStore('oshurnGoals',[]);if(goalCount)goalCount.textContent=Array.isArray(goals)?goals.length:0;return Array.isArray(goals)?goals:[];}
   let goals=syncGoals();
   const usage=getStore('oshurnToolUsage',{});
-  function syncUsage(){const total=Object.values(usage).reduce((sum,n)=>sum+(Number(n)||0),0);const metric=document.querySelector('.app-metrics article:nth-child(4) strong');if(metric)metric.textContent=total;return usage;}
+  function syncUsage(){const total=Object.values(usage).reduce((sum,n)=>sum+(Number(n)||0),0);const metric=$('#tool-use-count');if(metric)metric.textContent=total;return usage;}
   function recordToolUse(tool){if(!toolNames[tool])return;usage[tool]=(Number(usage[tool])||0)+1;setStore('oshurnToolUsage',usage);syncUsage();}
   syncUsage();
   document.querySelectorAll('a[href*="tools.html"],a[href="health.html"],a[href="goals.html"]').forEach(link=>link.addEventListener('click',()=>{const href=link.getAttribute('href')||'';const match=href.match(/tools\.html#([^#]+)/);const tool=match?match[1]:(href==='health.html'?'health':href==='goals.html'?'goal':null);if(tool)recordToolUse(tool)}));
@@ -47,8 +47,10 @@
     numeric.forEach(k=>{const n=Number(next&&next[k]);value[k]=Number.isFinite(n)?Math.max(0,n):0});
     return value;
   }
-  function saveSnapshot(next){const value=sanitizeSnapshot({...snapshot,...next});setStore('oshurnSnapshot',value);Object.assign(snapshot,value);return getSnapshot()}
+  function saveSnapshot(next){const value=sanitizeSnapshot({...snapshot,...next});setStore('oshurnSnapshot',value);Object.assign(snapshot,value);syncSnapshot();return getSnapshot()}
   function getSnapshot(){const income=snapshot.monthlyIncome;const expenses=snapshot.monthlyExpenses;const debt=snapshot.monthlyDebtPayments;const savings=snapshot.monthlySavings;const netWorth=snapshot.assets-snapshot.liabilities;const margin=income-expenses;const savingsRate=income>0?(savings/income)*100:0;const debtPaymentRate=income>0?(debt/income)*100:0;return {...snapshot,derived:{netWorth,monthlyMargin:margin,savingsRate,debtPaymentRate}}}
+  function syncSnapshot(){const data=getSnapshot();const margin=$('#margin-number'),marginStatus=$('#margin-status'),netWorth=$('#net-worth-number'),savingsRate=$('#savings-rate-number'),debtRate=$('#debt-rate-number'),note=$('#snapshot-note');if(margin)margin.textContent=money(data.derived.monthlyMargin);if(marginStatus)marginStatus.textContent=data.monthlyIncome?'Calculated from your snapshot':'Add your snapshot';if(netWorth)netWorth.textContent=money(data.derived.netWorth);if(savingsRate)savingsRate.textContent=`${data.derived.savingsRate.toFixed(1)}%`;if(debtRate)debtRate.textContent=`${data.derived.debtPaymentRate.toFixed(1)}%`;if(note)note.textContent=data.monthlyIncome?`Updated ${new Date(data.updatedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}. These figures are educational planning inputs, not financial advice.`:'Add your income, expenses, assets, and liabilities in Oshurn’s tools to build your personal snapshot.';return data}
+  syncSnapshot();
   function exportUserData(){const data={schemaVersion:1,exportedAt:new Date().toISOString(),data:{}};STATE_KEYS.forEach(k=>{const value=getStore(k,null);if(value!==null)data.data[k]=value});return JSON.stringify(data,null,2)}
   function clearUserData(){STATE_KEYS.forEach(k=>localStorage.removeItem(k));window.dispatchEvent(new CustomEvent('oshurn:state',{detail:{key:'oshurn:reset',value:true}}));return true}
   window.Oshurn={money,save:setStore,load:getStore,
@@ -63,9 +65,9 @@
     privacy:{exportData:exportUserData,clearData:clearUserData,keys:[...STATE_KEYS]},
     onboarding:{state:()=>getStore('oshurnOnboarding',{completed:false,step:0}),setStep:function(step){const value={completed:false,step:Math.max(0,Number(step)||0)};setStore('oshurnOnboarding',value);return value},complete:function(){const value={completed:true,step:4};setStore('oshurnOnboarding',value);return value}},
     search:function(query){const q=String(query||'').trim().toLowerCase();return q?results.filter(r=>(r[0]+' '+r[2]).toLowerCase().includes(q)):results},
-    version:'1.1.0'
+    version:'1.2.0'
   };
   if(onboarding.completed)document.documentElement.dataset.oshurnOnboarding='complete';
-  window.addEventListener('storage',e=>{if(e.key==='oshurnHealth')syncHealth();if(e.key==='oshurnGoals')syncGoals();if(e.key==='oshurnToolUsage'){Object.assign(usage,getStore('oshurnToolUsage',{}));syncUsage()}if(e.key==='oshurnSnapshot')Object.assign(snapshot,{...snapshotDefaults,...(getStore('oshurnSnapshot',{})||{})})});
-  window.addEventListener('oshurn:state',e=>{if(!e.detail)return;if(e.detail.key==='oshurnHealth')syncHealth();if(e.detail.key==='oshurnGoals')syncGoals();if(e.detail.key==='oshurnToolUsage'){Object.assign(usage,e.detail.value||{});syncUsage()}if(e.detail.key==='oshurnSnapshot')Object.assign(snapshot,{...snapshotDefaults,...(e.detail.value||{})})});
+  window.addEventListener('storage',e=>{if(e.key==='oshurnHealth')syncHealth();if(e.key==='oshurnGoals')syncGoals();if(e.key==='oshurnToolUsage'){Object.assign(usage,getStore('oshurnToolUsage',{}));syncUsage()}if(e.key==='oshurnSnapshot'){Object.assign(snapshot,{...snapshotDefaults,...(getStore('oshurnSnapshot',{})||{})});syncSnapshot()}});
+  window.addEventListener('oshurn:state',e=>{if(!e.detail)return;if(e.detail.key==='oshurnHealth')syncHealth();if(e.detail.key==='oshurnGoals')syncGoals();if(e.detail.key==='oshurnToolUsage'){Object.assign(usage,e.detail.value||{});syncUsage()}if(e.detail.key==='oshurnSnapshot'){Object.assign(snapshot,{...snapshotDefaults,...(e.detail.value||{})});syncSnapshot()}});
 })();
