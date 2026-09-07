@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-09-07",
+  "collections": [
+    {"id":"foundations","title":"Money Basics","description":"Core concepts for understanding everyday money.","lessons":[
+      {"id":"cash-flow","title":"Cash flow","minutes":4,"summary":"Understand how income and outflows interact and why monthly margin matters.","concepts":["income","expenses","margin"]},
+      {"id":"net-worth","title":"Net worth","minutes":3,"summary":"Learn the simple relationship between assets, liabilities, and financial position.","concepts":["assets","liabilities","net worth"]},
+      {"id":"emergency-fund","title":"Emergency funds","minutes":5,"summary":"Learn why accessible reserves can help absorb unexpected expenses.","concepts":["reserves","essential expenses","liquidity"]}
+    ]},
+    {"id":"credit","title":"Credit","description":"Build vocabulary for borrowing and credit management.","lessons":[
+      {"id":"credit-report","title":"Credit reports","minutes":6,"summary":"Understand what a credit report is and the kinds of information it contains.","concepts":["credit report","accounts","payment history"]},
+      {"id":"credit-utilization","title":"Credit utilization","minutes":4,"summary":"Learn the concept of revolving credit utilization and why balances can affect credit profiles.","concepts":["utilization","revolving credit","balances"]}
+    ]},
+    {"id":"business","title":"Business Finance","description":"Financial fundamentals for building a durable business.","lessons":[
+      {"id":"business-credit","title":"Business credit basics","minutes":7,"summary":"Learn the difference between business credit and personal credit and why recordkeeping matters.","concepts":["business credit","EIN","records"]},
+      {"id":"business-cash-flow","title":"Business cash flow","minutes":6,"summary":"Understand the movement of money into and out of a business.","concepts":["revenue","expenses","operating cash"]}
+    ]},
+    {"id":"housing","title":"Home & Housing","description":"Learn the vocabulary behind housing decisions.","lessons":[
+      {"id":"home-equity","title":"Home equity","minutes":4,"summary":"Understand the relationship between a property's value and the debt secured by it.","concepts":["home value","mortgage balance","equity"]},
+      {"id":"housing-affordability","title":"Housing affordability","minutes":6,"summary":"Explore the many costs that can affect whether a housing payment fits a budget.","concepts":["principal","interest","taxes","insurance","maintenance"]}
+    ]},
+    {"id":"investing","title":"Investing Concepts","description":"Educational foundations for understanding investing terminology.","lessons":[
+      {"id":"diversification","title":"Diversification","minutes":5,"summary":"Learn why spreading exposure across assets can change portfolio risk.","concepts":["risk","correlation","asset classes"]},
+      {"id":"compounding","title":"Compounding","minutes":5,"summary":"Understand how returns can accumulate on prior returns over time.","concepts":["growth","time","returns"]}
+    ]}
+  ]
+}
