@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "platformVersion": "1.8.1",
+  "purpose": "Canonical registry for Oshurn OS financial tools and their data boundaries.",
+  "principles": [
+    "Tools are modular applications, not marketing pages.",
+    "Shared financial state is the source for cross-tool summaries and trends.",
+    "Educational calculations must remain distinguishable from regulated individualized financial services.",
+    "Each tool declares inputs, outputs, persistence, and future integration points."
+  ],
+  "tools": [
+    {
+      "id": "budget",
+      "name": "Budget Planner",
+      "category": "cash-flow",
+      "status": "active",
+      "inputs": ["monthlyIncome", "monthlyExpenses", "monthlySavings"],
+      "outputs": ["monthlyMargin", "savingsRate"],
+      "persists": ["oshurnSnapshot", "oshurnSnapshotHistory", "oshurnToolUsage"],
+      "educationBoundary": "Descriptive budgeting and planning only; no individualized product recommendation."
+    },
+    {
+      "id": "debt",
+      "name": "Debt Payoff Explorer",
+      "category": "debt",
+      "status": "active",
+      "inputs": ["liabilities", "monthlyDebtPayments"],
+      "outputs": ["estimatedPayoffMonths"],
+      "persists": ["oshurnSnapshot", "oshurnSnapshotHistory", "oshurnToolUsage"],
+      "educationBoundary": "Scenario modeling only. Future APR-aware versions must label assumptions and estimated interest."
+    },
+    {
+      "id": "emergency",
+      "name": "Emergency Fund",
+      "category": "reserves",
+      "status": "active",
+      "inputs": ["essentialMonthlyExpenses", "coverageMonths"],
+      "outputs": ["reserveTarget"],
+      "persists": ["oshurnToolUsage"],
+      "educationBoundary": "General reserve-planning education."
+    },
+    {
+      "id": "savings",
+      "name": "Savings Planning",
+      "category": "savings",
+      "status": "active",
+      "inputs": ["savingsTarget", "monthsToTarget"],
+      "outputs": ["monthlySavingsPace"],
+      "persists": ["oshurnSnapshot", "oshurnSnapshotHistory", "oshurnToolUsage"],
+      "educationBoundary": "Goal pacing only; does not recommend securities or financial products."
+    },
+    {
+      "id": "networth",
+      "name": "Net Worth Snapshot",
+      "category": "balance-sheet",
+      "status": "active",
+      "inputs": ["cash", "investments", "otherAssets", "liabilities"],
+      "outputs": ["assets", "netWorth"],
+      "persists": ["oshurnSnapshot", "oshurnSnapshotHistory", "oshurnToolUsage"],
+      "educationBoundary": "User-entered balance-sheet organization and descriptive analytics."
+    },
+    {
+      "id": "health",
+      "name": "Financial Health",
+      "category": "wellness",
+      "status": "active",
+      "inputs": ["snapshotMetrics", "healthScore"],
+      "outputs": ["financialHealthSignals"],
+      "persists": ["oshurnHealth", "oshurnSnapshot", "oshurnSnapshotHistory"],
+      "educationBoundary": "Educational financial wellness indicators; not a credit, investment, insurance, tax, or legal determination."
+    },
+    {
+      "id": "goals",
+      "name": "Goal Planner",
+      "category": "planning",
+      "status": "active",
+      "inputs": ["goalName", "target", "current"],
+      "outputs": ["goalProgress"],
+      "persists": ["oshurnGoals", "oshurnToolUsage"],
+      "educationBoundary": "Goal organization and progress tracking."
+    }
+  ],
+  "futureModules": [
+    {
+      "id": "cashflow",
+      "name": "Cash Flow Analyzer",
+      "dependsOn": ["budget", "snapshotHistory"],
+      "status": "planned"
+    },
+    {
+      "id": "debt-optimizer",
+      "name": "Debt Strategy Lab",
+      "dependsOn": ["debt"],
+      "status": "planned",
+      "note": "Must expose assumptions and avoid presenting individualized regulated advice without the required compliance architecture."
+    },
+    {
+      "id": "retirement-education",
+      "name": "Retirement Education Lab",
+      "dependsOn": ["goals", "knowledge"],
+      "status": "planned",
+      "note": "Educational scenarios only until an appropriate regulated-advice framework exists."
+    },
+    {
+      "id": "insurance-education",
+      "name": "Protection Education",
+      "dependsOn": ["knowledge"],
+      "status": "planned",
+      "note": "Insurance education can be developed before any quoting, solicitation, recommendation, or transaction capability."
+    }
+  ],
+  "sharedState": {
+    "primarySnapshot": "oshurnSnapshot",
+    "history": "oshurnSnapshotHistory",
+    "goals": "oshurnGoals",
+    "learning": "oshurnLearningProgress",
+    "toolUsage": "oshurnToolUsage",
+    "profile": "oshurnProfile",
+    "privacy": "oshurnSavedResources"
+  },
+  "regulatedBoundary": {
+    "current": ["financial education", "calculators", "organization", "descriptive analytics", "learning content"],
+    "futureControlledCapabilities": ["investment recommendations", "securities transactions", "insurance solicitation or sales", "individualized regulated financial advice"],
+    "requirement": "Future regulated capabilities must use a separate compliance-ready service boundary, authorization model, disclosures, records, and applicable licensing/supervision controls rather than being enabled by the educational client layer."
+  }
+}
