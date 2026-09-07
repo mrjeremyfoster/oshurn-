@@ -1,0 +1,1 @@
+{"name":"Oshurn OS","short_name":"Oshurn","description":"A financial technology workspace for learning, organizing, exploring, and progressing.","start_url":"app.html","scope":"./","display":"standalone","background_color":"#f5f7fa","theme_color":"#f5f7fa","orientation":"any","icons":[{"src":"oshurn-logo.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
